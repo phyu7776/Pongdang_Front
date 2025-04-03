@@ -1,23 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { User, Lock, Moon, Sun } from "lucide-react";
+import useUserStore from "../store/userStore";
 import axios from "axios";
 
 function Login() {
+  const { setUser } = useUserStore();
   const navigate = useNavigate();
   const [form, setForm] = useState({ userId: "", password: "" });
   const [error, setError] = useState("");
-  const [isDark, setIsDark] = useState(true);
-
-  const toggleDark = () => {
-    setIsDark(!isDark);
+  const [isDark, setIsDark] = useState(() => {
+    // 최초 로딩 시 localStorage 확인
+    return localStorage.getItem("darkMode") === "true";
+  });
+  
+  
+  useEffect(() => {
+    // 컴포넌트 마운트 시 dark 클래스 적용
     const root = document.documentElement;
     if (isDark) {
-      root.classList.remove("dark");
-    } else {
       root.classList.add("dark");
-    }
+    } else {
+      root.classList.remove("dark");
+    }}, [isDark]);
+
+  const toggleDark = () => {
+    const next = !isDark;
+    setIsDark(next);
+    localStorage.setItem("darkMode", next); // 상태 저장
   };
 
   const handleChange = (e) => {
@@ -28,10 +39,16 @@ function Login() {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:8080/users/login", form, {
-        withCredentials: true
-      }) ;
-      localStorage.setItem("token", res.data.token);
+      const res = await axios.post("http://localhost:8080/users/login", form);
+  
+      const userData = res.data;
+  
+      // ✅ 전역 상태 저장
+      setUser(userData);
+  
+      // ✅ 토큰만 localStorage에 저장
+      localStorage.setItem("token", userData.token);
+  
       navigate("/dashboard");
     } catch (err) {
       setError("아이디 또는 비밀번호가 잘못되었습니다.");
