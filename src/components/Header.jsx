@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Moon, Sun } from "lucide-react"; // 다크모드 아이콘
 import { Bell, Settings, LogOut } from "lucide-react";
 import useUserStore from "../store/userStore";
 import { useNavigate } from "react-router-dom";
 
 function Header() {
-  const { user, clearUser } = useUserStore();
+  const { user ,clearUser } = useUserStore();
   const { darkMode, setDarkMode } = useUserStore();
   const navigate = useNavigate();
 
@@ -20,9 +20,9 @@ function Header() {
 
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    clearUser();
-    navigate("/login");
+    clearUser(); // 상태 초기화
+    localStorage.removeItem("token"); // 토큰 제거
+    navigate("/login"); // 로그인으로 이동
   };
 
   return (
@@ -43,10 +43,11 @@ function Header() {
           {darkMode ? <Sun size={24} /> : <Moon size={24} />}
         </button>
 
-        <LogOut
-          className="text-red-500 cursor-pointer"
-          onClick={handleLogout}
-        />
+
+        <button onClick={handleLogout} className="text-red-500 cursor-pointer">
+          <LogOut />
+        </button>
+      
       </div>
     </header>
   );

@@ -5,7 +5,7 @@ import { User, Lock, Moon, Sun } from "lucide-react";
 import useUserStore from "../store/userStore";
 import axios from "axios";
 
-function Login() {
+function Login({ onLogin }) {
   const { setUser } = useUserStore();
   const navigate = useNavigate();
   const [form, setForm] = useState({ userId: "", password: "" });
@@ -15,6 +15,10 @@ function Login() {
     return localStorage.getItem("darkMode") === "true";
   });
   
+  
+  useEffect(() => {
+    document.title = "퐁당 | 로그인 💧";
+  }, []);
   
   useEffect(() => {
     // 컴포넌트 마운트 시 dark 클래스 적용
@@ -48,7 +52,8 @@ function Login() {
   
       // ✅ 토큰만 localStorage에 저장
       localStorage.setItem("token", userData.token);
-  
+      onLogin();
+
       navigate("/dashboard");
     } catch (err) {
       setError("아이디 또는 비밀번호가 잘못되었습니다.");
