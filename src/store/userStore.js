@@ -2,14 +2,17 @@ import { create } from "zustand";
 
 const useUserStore = create((set) => ({
   user: JSON.parse(localStorage.getItem("user")) || null,
+
   setUser: (userData) => {
     set({ user: userData });
     localStorage.setItem("user", JSON.stringify(userData)); // user를 localStorage에 저장
   },
+
   clearUser: () => {
     set({ user: null });
     localStorage.removeItem("user");
   },
+  
   darkMode: JSON.parse(localStorage.getItem("darkMode")) || false, // 다크모드 상태
   setDarkMode: (isDark) => {
     set({ darkMode: isDark });

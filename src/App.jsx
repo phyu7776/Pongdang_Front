@@ -1,23 +1,47 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Layout from "./layout/Layout";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import DashboardMain from "./pages/DashboardMain";
-import useUserStore from "./store/userStore"; // 전역 상태
+import useUserStore from "./store/userStore";
+import api from "./utils/axios";
 
 function App() {
-  const { user } = useUserStore();
+  const { user, setUser } = useUserStore();
   const isLoggedIn = !!user?.token;
+  const navigate = useNavigate();
+
+  const handleLogin = async (userId, password) => {
+    try {
+      const response = await api.post("/users/login", { userId, password });
+      localStorage.setItem("token", response.data.token);
+      setUser(response.data);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("로그인 실패:", error);
+    }
+  };
 
   return (
     <Routes>
+
       <Route
         path="/login"
-        element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login />}
+        element={
+          isLoggedIn ? <Navigate to="/dashboard" /> : <Login onLogin={handleLogin} />
+        }
       />
+
+      <Route
+          path="/register"
+          element={<Register />} // ✅ 추가!
+        />
+
       <Route
         path="/"
         element={isLoggedIn ? <Layout /> : <Navigate to="/login" />}
       >
+
         <Route index element={<Navigate to="/dashboard" />} />
         <Route path="dashboard" element={<DashboardMain />} />
       </Route>

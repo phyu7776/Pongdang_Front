@@ -1,0 +1,84 @@
+.react-calendar {
+    width: 100%;
+    background: #fff;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    /* max-width 없앰: 화면 크기에 맞춰 확장! */
+  }
+  
+  .react-calendar--doubleView {
+    width: 100%;
+  }
+  
+  .react-calendar__navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  
+  .react-calendar__navigation button {
+    background: none;
+    border: none;
+    color: #2563eb;
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 0.75rem;
+  }
+  
+  .react-calendar__month-view__weekdays {
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+  }
+  
+  .react-calendar__tile {
+    background: none;
+    border: none;
+    text-align: center;
+    padding: 1rem 0.5rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+  }
+  
+  .react-calendar__tile:hover {
+    background: #f0f4ff;
+  }
+  
+  .react-calendar__tile--now {
+    background: #2563eb;
+    color: white;
+    border-radius: 8px;
+  }
+  
+  .react-calendar__tile--active {
+    background: #1d4ed8;
+    color: white;
+    border-radius: 8px;
+  }
+  
+  .react-calendar__month-view__days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+  }
+  
+  @media (max-width: 768px) {
+    .react-calendar__tile {
+      padding: 0.7rem 0.4rem;
+      font-size: 0.9rem;
+    }
+  
+    .react-calendar__navigation button {
+      font-size: 1.2rem;
+    }
+  }
+  

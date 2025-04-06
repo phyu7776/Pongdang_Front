@@ -14,13 +14,13 @@ function Layout() {
         <SideBar />
 
         {/* 메인 콘텐츠 영역 */}
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto">
           <Outlet /> {/* 여기에 각 페이지가 렌더링됨 */}
         </main>
       </div>
 
       {/* BottomDock 컴포넌트 */}
-      <BottomDock />
+      {/* <BottomDock /> */}
     </div>
   );
 }

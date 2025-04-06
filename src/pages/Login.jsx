@@ -2,37 +2,31 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { User, Lock, Moon, Sun } from "lucide-react";
-import useUserStore from "../store/userStore";
-import axios from "axios";
 
 function Login({ onLogin }) {
-  const { setUser } = useUserStore();
-  const navigate = useNavigate();
   const [form, setForm] = useState({ userId: "", password: "" });
   const [error, setError] = useState("");
   const [isDark, setIsDark] = useState(() => {
-    // 최초 로딩 시 localStorage 확인
     return localStorage.getItem("darkMode") === "true";
   });
-  
-  
+
   useEffect(() => {
     document.title = "퐁당 | 로그인 💧";
   }, []);
-  
+
   useEffect(() => {
-    // 컴포넌트 마운트 시 dark 클래스 적용
     const root = document.documentElement;
     if (isDark) {
       root.classList.add("dark");
     } else {
       root.classList.remove("dark");
-    }}, [isDark]);
+    }
+  }, [isDark]);
 
   const toggleDark = () => {
     const next = !isDark;
     setIsDark(next);
-    localStorage.setItem("darkMode", next); // 상태 저장
+    localStorage.setItem("darkMode", next);
   };
 
   const handleChange = (e) => {
@@ -43,18 +37,8 @@ function Login({ onLogin }) {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:8080/users/login", form);
-  
-      const userData = res.data;
-  
-      // ✅ 전역 상태 저장
-      setUser(userData);
-  
-      // ✅ 토큰만 localStorage에 저장
-      localStorage.setItem("token", userData.token);
-      onLogin();
-
-      navigate("/dashboard");
+      // ✅ 부모 App.jsx 의 onLogin 함수로 form 데이터만 전달!
+      await onLogin(form.userId, form.password);
     } catch (err) {
       setError("아이디 또는 비밀번호가 잘못되었습니다.");
     }
@@ -68,7 +52,6 @@ function Login({ onLogin }) {
         transition={{ duration: 0.4 }}
         className="bg-white dark:bg-zinc-900 shadow-lg rounded-2xl px-10 py-12 w-full max-w-md relative"
       >
-        {/* 다크모드 토글 */}
         <button
           onClick={toggleDark}
           className="absolute top-4 right-4 text-gray-400 hover:text-white"
