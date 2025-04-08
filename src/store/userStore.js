@@ -1,16 +1,18 @@
 import { create } from "zustand";
+import Cookies from 'js-cookie';
 
 const useUserStore = create((set) => ({
-  user: JSON.parse(localStorage.getItem("user")) || null,
+  user: Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null,
 
   setUser: (userData) => {
     set({ user: userData });
-    localStorage.setItem("user", JSON.stringify(userData)); // user를 localStorage에 저장
+    Cookies.set('user', JSON.stringify(userData), { expires: 7, secure: true, sameSite: 'Strict' }); // user 쿠키에 저장
   },
 
   clearUser: () => {
+    Cookies.remove('token');
+    Cookies.remove('user'); // ✅ user 쿠키도 삭제
     set({ user: null });
-    localStorage.removeItem("user");
   },
   
   darkMode: JSON.parse(localStorage.getItem("darkMode")) || false, // 다크모드 상태

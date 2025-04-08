@@ -1,5 +1,6 @@
 // src/utils/axios.js
 import axios from "axios";
+import Cookies from "js-cookie";
 
 // 공통 axios 인스턴스 생성
 const api = axios.create({
@@ -10,10 +11,10 @@ const api = axios.create({
 // 요청 전에 토큰 자동으로 붙이는 인터셉터
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    }
+    const token = Cookies.get("token");
+  if (token) {
+    config.headers["Authorization"] = `Bearer ${token}`;
+  }
     return config;
   },
   (error) => {

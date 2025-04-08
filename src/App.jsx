@@ -4,18 +4,31 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import DashboardMain from "./pages/DashboardMain";
 import useUserStore from "./store/userStore";
-import api from "./utils/axios";
+import axiosUtil from "./utils/axiosUtil";
+import Cookies from 'js-cookie';
+import { useMenuStore } from "./store/menuStore";
 
 function App() {
-  const { user, setUser } = useUserStore();
-  const isLoggedIn = !!user?.token;
+  const { setUser } = useUserStore();
+  const { fetchMenus } = useMenuStore();
+  const isLoggedIn = !!Cookies.get('token');
   const navigate = useNavigate();
 
   const handleLogin = async (userId, password) => {
     try {
-      const response = await api.post("/users/login", { userId, password });
-      localStorage.setItem("token", response.data.token);
-      setUser(response.data);
+      const response = await axiosUtil.post("/users/login", { userId, password });
+      Cookies.set('token', response.data.token, { expires: 7, secure: true, sameSite: 'Strict' });
+    
+      setUser({
+        userId: response.data.userId,
+        name: response.data.name,
+        nickname: response.data.nickname,
+        role: response.data.role,
+        birthday: response.data.birthday,
+        uid: response.data.uid,
+      });
+
+      await fetchMenus();
       navigate("/dashboard");
     } catch (error) {
       console.error("로그인 실패:", error);

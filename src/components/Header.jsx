@@ -21,7 +21,6 @@ function Header() {
 
   const handleLogout = () => {
     clearUser(); // 상태 초기화
-    localStorage.removeItem("token"); // 토큰 제거
     navigate("/login"); // 로그인으로 이동
   };
 

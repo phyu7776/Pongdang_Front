@@ -1,32 +1,27 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import useUserStore from "../store/userStore";
 import { motion } from "framer-motion";
 import { User, Lock, Moon, Sun } from "lucide-react";
 
 function Login({ onLogin }) {
   const [form, setForm] = useState({ userId: "", password: "" });
   const [error, setError] = useState("");
-  const [isDark, setIsDark] = useState(() => {
-    return localStorage.getItem("darkMode") === "true";
-  });
+  const { darkMode, setDarkMode } = useUserStore();
 
   useEffect(() => {
     document.title = "퐁당 | 로그인 💧";
   }, []);
 
   useEffect(() => {
-    const root = document.documentElement;
-    if (isDark) {
-      root.classList.add("dark");
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
     } else {
-      root.classList.remove("dark");
+      document.documentElement.classList.remove("dark");
     }
-  }, [isDark]);
-
+  }, [darkMode]);
+  
   const toggleDark = () => {
-    const next = !isDark;
-    setIsDark(next);
-    localStorage.setItem("darkMode", next);
+    setDarkMode(!darkMode);
   };
 
   const handleChange = (e) => {
@@ -56,7 +51,7 @@ function Login({ onLogin }) {
           onClick={toggleDark}
           className="absolute top-4 right-4 text-gray-400 hover:text-white"
         >
-          {isDark ? <Sun size={20} /> : <Moon size={20} />}
+          {darkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
 
         <h1 className="text-3xl font-bold text-center mb-6 dark:text-white">
