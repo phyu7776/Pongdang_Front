@@ -25,22 +25,21 @@ Pongdang 웹 애플리케이션의 프론트엔드 프로젝트입니다.
 npm install
 ```
 
-2. 개발 서버 실행
+2. 환경 설정
+- `.env` 파일을 프로젝트 루트에 생성
+- 다음 환경 변수를 설정:
+```env
+VITE_API_BASE_URL=http://localhost:8080  # 백엔드 API 서버 URL
+```
+
+3. 개발 서버 실행
 ```bash
 npm run dev
 ```
 
-3. 빌드
+4. 빌드
 ```bash
 npm run build
-```
-
-## 환경 설정
-
-`.env` 파일을 생성하고 다음 환경 변수를 설정하세요:
-
-```env
-VITE_API_BASE_URL=http://your-api-url
 ```
 
 ## API 문서

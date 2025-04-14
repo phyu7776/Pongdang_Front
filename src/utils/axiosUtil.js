@@ -5,13 +5,13 @@ import useUserStore from "../store/userStore";
 import { auth } from "../api/endpoints";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
 });
 
 // ✅ 재발급용 axios 인스턴스 (인터셉터 안 걸림)
 export const refreshApi = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
 });
 
