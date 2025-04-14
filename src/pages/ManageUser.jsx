@@ -1,9 +1,10 @@
 import { useEffect, useState, forwardRef } from 'react';
 import { 
   Users, Search, Edit2, Trash2, UserCheck, Check, UserX, Clock, User, Key, ChevronDown,
-  Shield, UserCog, Users as UsersIcon
+  Shield, UserCog, Users as UsersIcon, XCircle
 } from 'lucide-react';
 import Tippy from '@tippyjs/react';
+import toast, { Toaster } from 'react-hot-toast';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/material.css';
 import 'tippy.js/animations/shift-away.css';
@@ -13,7 +14,13 @@ import userStore from '../store/userStore';
 // 커스텀 스타일 추가
 const customTippyStyles = {
   '.tippy-content': {
-    padding: 0
+    padding: 0,
+    border: 'none',
+    backgroundColor: 'transparent'
+  },
+  '.tippy-box': {
+    border: 'none',
+    backgroundColor: 'transparent'
   }
 };
 
@@ -100,24 +107,52 @@ function ManageUser() {
 
   const approveUsers = async (uids) => {
     try {
-      // 선택된 사용자들의 정보를 리스트로 구성
       const approveList = uids.map(uid => {
         const user = users.find(u => u.uid === uid);
         if (!user) return null;
         return {
           uid: user.uid,
           userId: user.userId,
-          role: userRoles[uid] || 'USER' // 선택된 역할 사용
+          role: userRoles[uid] || 'USER'
         };
       }).filter(Boolean);
 
       await axiosUtil.put('/admin/approve', approveList);
-      fetchUsers(); // 목록 새로고침
-      setSelectedUsers([]); // 선택 초기화
-      alert('선택한 사용자들의 가입이 승인되었습니다.');
+      fetchUsers();
+      setSelectedUsers([]);
+      toast.custom((t) => (
+        <div className="fixed inset-0 flex items-center justify-center z-[9999]">
+          <div className="bg-green-500 text-white px-8 py-4 rounded-lg shadow-lg flex items-center gap-3">
+            <UserCheck className="w-5 h-5" />
+            <p className="text-base font-medium">선택한 사용자들의 가입이 승인되었습니다</p>
+          </div>
+        </div>
+      ), {
+        duration: 2000,
+        position: 'bottom-center',
+        style: {
+          background: 'transparent',
+          maxWidth: 'none',
+          padding: 0
+        }
+      });
     } catch (err) {
       console.error('Error approving users:', err);
-      alert('사용자 승인 중 오류가 발생했습니다.');
+      toast.custom((t) => (
+        <div className="fixed inset-0 flex items-center justify-center">
+          <div className="bg-red-500 text-white px-8 py-4 rounded-lg shadow-lg flex items-center gap-3">
+            <XCircle className="w-5 h-5" />
+            <p className="text-base font-medium">사용자 승인 중 오류가 발생했습니다</p>
+          </div>
+        </div>
+      ), {
+        duration: 3000,
+        style: {
+          background: 'transparent',
+          maxWidth: 'none',
+          padding: 0
+        }
+      });
     }
   };
 
@@ -172,21 +207,21 @@ function ManageUser() {
         return {
           icon: <Shield className="w-4 h-4" />,
           color: 'text-purple-600 dark:text-purple-400',
-          bgColor: 'bg-purple-50 dark:bg-purple-900/30',
+          bgColor: 'bg-purple-100 dark:bg-purple-900',
           borderColor: 'border-purple-200 dark:border-purple-700'
         };
       case 'supervisor':
         return {
           icon: <UserCog className="w-4 h-4" />,
           color: 'text-blue-600 dark:text-blue-400',
-          bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+          bgColor: 'bg-blue-100 dark:bg-blue-900',
           borderColor: 'border-blue-200 dark:border-blue-700'
         };
       default:
         return {
           icon: <UsersIcon className="w-4 h-4" />,
           color: 'text-gray-600 dark:text-gray-400',
-          bgColor: 'bg-gray-50 dark:bg-gray-900/30',
+          bgColor: 'bg-gray-100 dark:bg-gray-800',
           borderColor: 'border-gray-200 dark:border-gray-700'
         };
     }
@@ -194,26 +229,52 @@ function ManageUser() {
 
   const RoleDropdown = ({ value, onChange, roles, disabled }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const selectedRole = roles.find(role => role.value === value) || roles[0];
-    const roleConfig = getRoleConfig(selectedRole.value);
-    const [triggerRef, setTriggerRef] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [selectedNewRole, setSelectedNewRole] = useState(null);
+    
+    const handleRoleSelect = (role) => {
+      if (role.value !== value) {
+        setSelectedNewRole(role);
+        setShowConfirmModal(true);
+      }
+      setIsOpen(false);
+    };
+
+    const getRoleDescription = (roleValue) => {
+      switch (roleValue.toLowerCase()) {
+        case 'admin':
+          return '모든 시스템 설정 및 사용자 관리 권한';
+        case 'supervisor':
+          return '일반 사용자 관리 및 제한된 설정 권한';
+        case 'user':
+          return '기본 사용자 권한';
+        default:
+          return '권한 설명 없음';
+      }
+    };
 
     const TippyContent = () => (
-      <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg min-w-[160px]">
-        {roles.map(role => {
+      <div className="py-2 bg-white dark:bg-zinc-800 rounded-lg shadow-lg min-w-[200px]">
+        {roles.map((role) => {
           const config = getRoleConfig(role.value);
           return (
             <button
               key={role.value}
-              className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-zinc-700 flex items-center space-x-2
-                ${role.value === value ? config.color + ' ' + config.bgColor : 'text-gray-700 dark:text-gray-200'}`}
-              onClick={() => {
-                onChange(role.value);
-                setIsOpen(false);
-              }}
+              onClick={() => handleRoleSelect(role)}
+              className={`w-full px-4 py-2 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700
+                ${role.value === value ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}`}
+              role="menuitem"
+              aria-selected={role.value === value}
             >
-              {config.icon}
-              <span>{role.label}</span>
+              <div className="flex items-center space-x-2">
+                <span className={`flex items-center justify-center ${config.color}`}>
+                  {config.icon}
+                </span>
+                <span className="font-medium">{role.label}</span>
+              </div>
+              {role.value === value && (
+                <Check className="w-4 h-4 text-blue-500" />
+              )}
             </button>
           );
         })}
@@ -222,34 +283,82 @@ function ManageUser() {
 
     return (
       <>
-        <button
-          ref={setTriggerRef}
-          className={`flex items-center justify-between w-full px-3 py-2 text-sm border rounded-lg transition-colors space-x-2
-            ${disabled 
-              ? 'bg-gray-100 dark:bg-zinc-800 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
-              : 'bg-white dark:bg-zinc-800 border-gray-300 dark:border-gray-600 ' + roleConfig.color + ' hover:' + roleConfig.bgColor
-            }`}
-          onClick={() => !disabled && setIsOpen(!isOpen)}
-        >
-          <div className="flex items-center space-x-2">
-            {roleConfig.icon}
-            <span>{selectedRole.label}</span>
-          </div>
-          <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
-        </button>
-        {triggerRef && (
+        <div className="relative">
           <Tippy
             content={<TippyContent />}
             interactive={true}
-            placement="bottom"
-            arrow={false}
+            visible={isOpen}
+            onClickOutside={() => setIsOpen(false)}
+            placement="bottom-start"
             theme="material"
             animation="shift-away"
-            visible={isOpen && !disabled}
-            onClickOutside={() => setIsOpen(false)}
+            arrow={false}
+            maxWidth="none"
             appendTo={() => document.body}
-            reference={triggerRef}
-          />
+          >
+            <button
+              onClick={() => !disabled && setIsOpen(!isOpen)}
+              className={`flex items-center space-x-2 px-3 py-1.5 rounded-md transition-colors
+                ${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700'}
+                ${getRoleConfig(value).bgColor}`}
+              aria-haspopup="true"
+              aria-expanded={isOpen}
+              disabled={disabled}
+            >
+              <span className={`flex items-center ${getRoleConfig(value).color}`}>
+                {getRoleConfig(value).icon}
+              </span>
+              <span className="font-medium text-gray-900 dark:text-white">{roles.find(role => role.value === value)?.label}</span>
+              <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'transform rotate-180' : ''} text-gray-500 dark:text-gray-400`} />
+              <span className="sr-only">{getRoleDescription(value)}</span>
+            </button>
+          </Tippy>
+          {isOpen && (
+            <div className="fixed inset-0 z-10" aria-hidden="true" onClick={() => setIsOpen(false)} />
+          )}
+        </div>
+        
+        {/* 확인 모달 */}
+        {showConfirmModal && (
+          <div className="fixed inset-0 flex items-center justify-center z-[9999]">
+            <div className="absolute inset-0 bg-black bg-opacity-30" onClick={() => setShowConfirmModal(false)} />
+            <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-xl p-6 max-w-md w-full mx-4 relative z-10">
+              <div className="flex-1">
+                <p className="text-lg font-semibold text-gray-900 dark:text-white mb-3">역할 변경 확인</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  사용자의 역할을 <span className="font-medium text-blue-600 dark:text-blue-400">{selectedNewRole?.label}</span>(으)로 변경하시겠습니까?
+                </p>
+              </div>
+              <div className="flex justify-end gap-2 mt-6">
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={() => {
+                    onChange(selectedNewRole.value);
+                    setShowConfirmModal(false);
+                    toast.custom((t) => (
+                      <div className="fixed bottom-0 left-0 right-0 flex justify-center mb-4">
+                        <div className="bg-green-500 text-white px-8 py-4 rounded-lg shadow-lg flex items-center gap-3">
+                          <Check className="w-5 h-5" />
+                          <p className="text-base font-medium">역할이 변경되었습니다</p>
+                        </div>
+                      </div>
+                    ), {
+                      duration: 2000,
+                      position: 'bottom-center'
+                    });
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-colors"
+                >
+                  확인
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </>
     );
@@ -276,11 +385,25 @@ function ManageUser() {
   const waitingUsersCount = users.filter(user => user.state === 'W').length;
 
   return (
-    <div className="p-8 bg-white dark:bg-zinc-800 min-h-screen">
+    <div className="p-8 bg-white dark:bg-zinc-900 min-h-screen">
+      <Toaster
+        position="bottom-center"
+        containerClassName="!transform-none"
+        toastOptions={{
+          className: '!transform-none',
+          style: {
+            background: 'transparent',
+            boxShadow: 'none',
+            padding: 0,
+            maxWidth: 'none',
+            width: 'auto'
+          }
+        }}
+      />
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-3">
           <Users className="w-8 h-8 text-blue-500" />
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
             사용자 관리
           </h1>
         </div>
@@ -315,12 +438,12 @@ function ManageUser() {
       </div>
 
       {/* 사용자 목록 테이블 */}
-      <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg overflow-hidden">
+      <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-zinc-800">
             <tr>
               {waitingUsersCount > 0 && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                   <input
                     type="checkbox"
                     checked={selectedUsers.length === waitingUsersCount && waitingUsersCount > 0}
@@ -329,29 +452,29 @@ function ManageUser() {
                   />
                 </th>
               )}
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                 사용자 정보
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                 닉네임
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                 역할
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                 상태
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                 생년월일
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                 작업
               </th>
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-zinc-900 divide-y divide-gray-200 dark:divide-gray-700">
             {users.map((user) => (
-              <tr key={user.uid}>
+              <tr key={user.uid} className="hover:bg-gray-50 dark:hover:bg-zinc-800">
                 {waitingUsersCount > 0 && (
                   <td className="px-6 py-4 whitespace-nowrap">
                     {user.state === 'W' && (

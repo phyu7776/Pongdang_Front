@@ -53,7 +53,14 @@ api.interceptors.response.use(
         if (!refreshToken) throw new Error("리프레시 토큰 없음");
 
         const accessToken = Cookies.get("token");
-        const userCookie = JSON.parse(Cookies.get("user")); // ✅ 문자열 → 객체
+        let userCookie;
+        
+        try {
+          userCookie = JSON.parse(Cookies.get("user") || "{}");
+          if (!userCookie.userId) throw new Error("유저 정보 없음");
+        } catch (e) {
+          throw new Error("유저 정보 파싱 실패");
+        }
   
         const user = {
           userId: userCookie.userId,
@@ -65,6 +72,10 @@ api.interceptors.response.use(
         
         const { data } = await refreshApi.post("/users/reissue", user);
 
+        if (!data?.token?.accessToken) {
+          throw new Error("토큰 재발급 응답 형식 오류");
+        }
+
         const configStore = useConfigStore.getState().config;
         
         Cookies.set("token", data.token.accessToken, {
@@ -73,7 +84,7 @@ api.interceptors.response.use(
           sameSite: "Strict",
         });
 
-        originalRequest.headers["Authorization"] = `Bearer ${data.accessToken}`;
+        originalRequest.headers["Authorization"] = `Bearer ${data.token.accessToken}`;
 
         return api(originalRequest);
       } catch (reissueError) {
