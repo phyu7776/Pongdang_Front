@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useMenuStore } from '../store/menuStore';
 import axiosUtil from '../utils/axiosUtil';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import { menus as menuApi } from '../api/endpoints';
 
 function Sidebar() {
   const { menus } = useMenuStore();
@@ -26,17 +27,17 @@ function Sidebar() {
     }
 
     try {
-      const response = await axiosUtil.get(`/menu/get/${menu.uid}`);
+      const response = await menuApi.getMenuByUid(menu.uid);
       setSubMenus(prev => ({
         ...prev,
-        [menu.uid]: response.data
+        [menu.uid]: response
       }));
       setExpandedMenus(prev => ({
         ...prev,
         [menu.uid]: true
       }));
     } catch (error) {
-      console.error('메뉴 데이터 가져오기 실패:', error);
+      console.error('Error fetching menu:', error);
     }
   };
 

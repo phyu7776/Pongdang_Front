@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../store/userStore";
-import axiosUtil from "../utils/axiosUtil";
 import { motion } from "framer-motion";
 import { User, CalendarDays, Smile, BadgeInfo, Lock, Sun, Moon } from "lucide-react";
+import { ToasterConfig, showSuccessToast, showErrorToast } from '../components/common/Toast';
+import { auth } from '../api/endpoints';
 
 function Register() {
   const navigate = useNavigate();
@@ -40,16 +41,23 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axiosUtil.post("/users/signup", form);
-      alert("회원가입 성공! 로그인 페이지로 이동합니다.");
+      await auth.signup(form);
+      showSuccessToast('회원가입이 완료되었습니다! 관리자 승인 후 로그인이 가능합니다.');
       navigate("/login");
     } catch (err) {
-      setError("회원가입 실패: " + (err.response?.data || "오류가 발생했습니다."));
+      if (err.response?.status === 409) {
+        showErrorToast('이미 사용 중인 아이디입니다. 다른 아이디를 입력해주세요.');
+      } else if (err.response?.status === 400) {
+        showErrorToast('입력하신 정보를 다시 확인해주세요.');
+      } else {
+        showErrorToast('회원가입 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center transition bg-gray-100 dark:bg-black">
+      <ToasterConfig />
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}

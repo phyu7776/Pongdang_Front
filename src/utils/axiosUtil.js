@@ -2,7 +2,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import useUserStore from "../store/userStore";
-import useConfigStore from "../store/configStore";
+import { auth } from "../api/endpoints";
 
 const api = axios.create({
   baseURL: "http://localhost:8080",
@@ -10,7 +10,7 @@ const api = axios.create({
 });
 
 // ✅ 재발급용 axios 인스턴스 (인터셉터 안 걸림)
-const refreshApi = axios.create({
+export const refreshApi = axios.create({
   baseURL: "http://localhost:8080",
   withCredentials: true,
 });
@@ -18,7 +18,9 @@ const refreshApi = axios.create({
 // 로그아웃 함수
 const logout = () => {
   useUserStore.getState().clearUser();
-  window.location.href = "/login";
+  // React Router를 통한 네비게이션을 위해 이벤트를 발생시킵니다
+  const event = new CustomEvent('auth-logout');
+  window.dispatchEvent(event);
 };
 
 // 요청 전에 토큰 자동으로 붙이는 인터셉터
@@ -70,26 +72,12 @@ api.interceptors.response.use(
           }
         };
         
-        const { data } = await refreshApi.post("/users/reissue", user);
-
-        if (!data?.token?.accessToken) {
-          throw new Error("토큰 재발급 응답 형식 오류");
-        }
-
-        const configStore = useConfigStore.getState().config;
-        
-        Cookies.set("token", data.token.accessToken, {
-          expires: configStore.liveAccessToken,
-          secure: true,
-          sameSite: "Strict",
-        });
-
+        const data = await auth.reissueToken(user);
         originalRequest.headers["Authorization"] = `Bearer ${data.token.accessToken}`;
-
         return api(originalRequest);
       } catch (reissueError) {
         console.error("토큰 재발급 실패:", reissueError);
-        logout(); // ✅ 재발급 실패 시 바로 로그아웃!
+        logout();
         return Promise.reject(reissueError);
       }
     }
@@ -97,5 +85,14 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// axios 메서드 래퍼 함수들
+export const axiosUtil = {
+  get: (url, params) => api.get(url, { params }),
+  post: (url, data) => api.post(url, data),
+  put: (url, data) => api.put(url, data),
+  patch: (url, data) => api.patch(url, data),
+  delete: (url, data) => api.delete(url, { data: data })
+};
 
 export default api;

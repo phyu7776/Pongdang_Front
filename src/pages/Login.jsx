@@ -7,6 +7,7 @@ function Login({ onLogin }) {
   const [form, setForm] = useState({ userId: "", password: "" });
   const [error, setError] = useState("");
   const { darkMode, setDarkMode } = useUserStore();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     document.title = "퐁당 | 로그인 💧";
@@ -30,12 +31,19 @@ function Login({ onLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
 
     try {
-      // ✅ 부모 App.jsx 의 onLogin 함수로 form 데이터만 전달!
       await onLogin(form.userId, form.password);
-    } catch (err) {
-      setError("아이디 또는 비밀번호가 잘못되었습니다.");
+    } catch (error) {
+      if (error.response?.status === 400) {
+        setError('아이디 또는 비밀번호가 잘못되었습니다.');
+      } else if (error.response?.status === 423) {
+        setError('승인되지 않은 계정입니다. 관리자의 승인을 기다려주세요.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Settings, User, Lock, Mail, Phone } from 'lucide-react';
 import useUserStore from '../store/userStore';
-import axiosUtil from '../utils/axiosUtil';
+import { users } from '../api/endpoints';
+import { ToasterConfig, showSuccessToast, showErrorToast } from '../components/common/Toast';
 
 function UserSettings() {
   const { user } = useUserStore();
@@ -9,12 +10,12 @@ function UserSettings() {
   const [userInfo, setUserInfo] = useState({
     name: '',
     nickname: '',
-    email: '',
-    phone: '',
+    birthday: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
+  const [passwordError, setPasswordError] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -22,8 +23,7 @@ function UserSettings() {
         ...prev,
         name: user.name || '',
         nickname: user.nickname || '',
-        email: user.email || '',
-        phone: user.phone || ''
+        birthday: user.birthday ? new Date(user.birthday).toISOString().split('T')[0] : ''
       }));
     }
   }, [user]);
@@ -40,10 +40,46 @@ function UserSettings() {
     e.preventDefault();
     setLoading(true);
     try {
-      // API 호출 로직 구현 예정
-      console.log('Updated user info:', userInfo);
+      const updatedUser = {
+        ...user,
+        name: userInfo.name,
+        nickname: userInfo.nickname,
+        birthday: userInfo.birthday
+      };
+      await users.updateUser(updatedUser);
+      showSuccessToast('사용자 정보가 수정되었습니다');
     } catch (error) {
       console.error('Error updating user info:', error);
+      showErrorToast('사용자 정보 수정 중 오류가 발생했습니다');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (userInfo.newPassword !== userInfo.confirmPassword) {
+      setPasswordError(true);
+      showErrorToast('새 비밀번호가 일치하지 않습니다');
+      return;
+    }
+    setPasswordError(false);
+    setLoading(true);
+    try {
+      await users.changePassword({
+        currentPassword: userInfo.currentPassword,
+        newPassword: userInfo.newPassword
+      });
+      showSuccessToast('비밀번호가 변경되었습니다');
+      setUserInfo(prev => ({
+        ...prev,
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }));
+    } catch (error) {
+      console.error('Error changing password:', error);
+      showErrorToast('비밀번호 변경 중 오류가 발생했습니다');
     } finally {
       setLoading(false);
     }
@@ -58,134 +94,123 @@ function UserSettings() {
         </h1>
       </div>
 
-      <div className="max-w-2xl mx-auto">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 기본 정보 섹션 */}
-          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-              <User className="w-5 h-5" />
-              기본 정보
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  이름
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={userInfo.name}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  닉네임
-                </label>
-                <input
-                  type="text"
-                  name="nickname"
-                  value={userInfo.nickname}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
-                />
-              </div>
+      <div className="max-w-2xl mx-auto space-y-6">
+        {/* 기본 정보 수정 폼 */}
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg p-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <User className="w-5 h-5" />
+            기본 정보
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                이름
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={userInfo.name}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                닉네임
+              </label>
+              <input
+                type="text"
+                name="nickname"
+                value={userInfo.nickname}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                생년월일
+              </label>
+              <input
+                type="date"
+                name="birthday"
+                value={userInfo.birthday}
+                onChange={handleChange}
+                max={new Date().toISOString().split('T')[0]}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+              />
             </div>
           </div>
-
-          {/* 연락처 정보 섹션 */}
-          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-              <Mail className="w-5 h-5" />
-              연락처 정보
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  이메일
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={userInfo.email}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  전화번호
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={userInfo.phone}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 비밀번호 변경 섹션 */}
-          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-              <Lock className="w-5 h-5" />
-              비밀번호 변경
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  현재 비밀번호
-                </label>
-                <input
-                  type="password"
-                  name="currentPassword"
-                  value={userInfo.currentPassword}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  새 비밀번호
-                </label>
-                <input
-                  type="password"
-                  name="newPassword"
-                  value={userInfo.newPassword}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  새 비밀번호 확인
-                </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={userInfo.confirmPassword}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 저장 버튼 */}
-          <div className="flex justify-end">
+          <div className="flex justify-end mt-6">
             <button
               type="submit"
               disabled={loading}
               className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? '저장 중...' : '변경사항 저장'}
+              {loading ? '저장 중...' : '기본 정보 저장'}
+            </button>
+          </div>
+        </form>
+
+        {/* 비밀번호 변경 폼 */}
+        <form onSubmit={handlePasswordChange} className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg p-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <Lock className="w-5 h-5" />
+            비밀번호 변경
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                현재 비밀번호
+              </label>
+              <input
+                type="password"
+                name="currentPassword"
+                value={userInfo.currentPassword}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                새 비밀번호
+              </label>
+              <input
+                type="password"
+                name="newPassword"
+                value={userInfo.newPassword}
+                onChange={handleChange}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white ${
+                  passwordError ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+                }`}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                새 비밀번호 확인
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={userInfo.confirmPassword}
+                onChange={handleChange}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white ${
+                  passwordError ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+                }`}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end mt-6">
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? '변경 중...' : '비밀번호 변경'}
             </button>
           </div>
         </form>
       </div>
+      <ToasterConfig />
     </div>
   );
 }
