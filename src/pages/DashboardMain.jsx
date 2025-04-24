@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMenuStore } from "../store/menuStore";
 import useUserStore from "../store/userStore";
+import { users } from "../api/endpoints";
 import Calendar from "react-calendar";
 import '../styles/Calendar.css';
 import { Activity, Clock, Plus, ChevronRight, BarChart2, Users, Target } from 'lucide-react';
@@ -9,21 +10,38 @@ function DashboardMain() {
   const { fetchMenus } = useMenuStore();
   const { user } = useUserStore();
   const [date, setDate] = useState(new Date());
+  const [teamStats, setTeamStats] = useState({ totalCount: 0, users: [] });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     document.title = "퐁당 | 대시보드 📊";
     fetchMenus();
+    fetchTeamStats();
   }, []);
+
+  const fetchTeamStats = async () => {
+    try {
+      setIsLoading(true);
+      const response = await users.getUsers();
+      const totalCount = response?.totalCount || 0;
+      setTeamStats({ totalCount, users: response?.users || [] });
+    } catch (error) {
+      console.error('팀 통계 조회 실패:', error);
+      setTeamStats({ totalCount: 0, users: [] });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleDateChange = (selectedDate) => {
     setDate(selectedDate);
   };
 
-  // 통계 데이터 (실제로는 API에서 가져올 데이터)
+  // 통계 데이터
   const stats = [
     { title: "이번 달 일정", value: "12개", icon: <Clock className="w-6 h-6" />, color: "bg-blue-500" },
     { title: "활성 프로젝트", value: "4개", icon: <Target className="w-6 h-6" />, color: "bg-green-500" },
-    { title: "팀 멤버", value: "8명", icon: <Users className="w-6 h-6" />, color: "bg-purple-500" },
+    { title: "팀 멤버", value: isLoading ? "로딩 중..." : `${teamStats.totalCount}명`, icon: <Users className="w-6 h-6" />, color: "bg-purple-500" },
     { title: "완료된 작업", value: "85%", icon: <BarChart2 className="w-6 h-6" />, color: "bg-orange-500" },
   ];
 

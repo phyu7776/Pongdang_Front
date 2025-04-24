@@ -42,14 +42,14 @@ function ManageUser() {
         config.getSystemConfig('role')
       ]);
 
-      setUserList(usersResponse);
+      setUserList(usersResponse.users || []);
       setRoles(rolesResponse.map(role => ({
         value: role.configValue,
         label: role.name
       })));
 
       const initialRoles = {};
-      usersResponse.forEach(user => {
+      (usersResponse.users || []).forEach(user => {
         initialRoles[user.uid] = user.role || 'USER';
       });
       setUserRoles(initialRoles);
@@ -66,7 +66,7 @@ function ManageUser() {
     try {
       setLoading(true);
       const response = await users.getUsers();
-      setUserList(response);
+      setUserList(response.users || []);
       setError(null);
     } catch (err) {
       setError('사용자 목록을 불러오는데 실패했습니다.');
@@ -101,10 +101,10 @@ function ManageUser() {
     try {
       const updatedUser = { ...user, role };
       await users.updateUser(updatedUser);
-      setUserRoles(prev => ({
-        ...prev,
-        [uid]: role
-      }));
+    setUserRoles(prev => ({
+      ...prev,
+      [uid]: role
+    }));
       showSuccessToast('역할이 성공적으로 변경되었습니다');
     } catch (err) {
       console.error('Error updating user role:', err);
@@ -284,83 +284,62 @@ function ManageUser() {
               const StateIcon = stateLabel.icon;
               
               return (
-                <tr key={user.uid} className="hover:bg-gray-50 dark:hover:bg-zinc-800">
-                  {waitingUsersCount > 0 && (
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {user.state === 'W' && (
-                        <input
-                          type="checkbox"
-                          checked={selectedUsers.includes(user.uid)}
-                          onChange={() => handleUserSelect(user.uid)}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-zinc-800"
-                        />
-                      )}
-                    </td>
-                  )}
+              <tr key={user.uid} className="hover:bg-gray-50 dark:hover:bg-zinc-800">
+                {waitingUsersCount > 0 && (
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="text-sm">
-                        <div className="font-medium text-gray-900 dark:text-white">
-                          {user.name}
-                        </div>
-                        <div className="text-gray-500 dark:text-gray-400">
-                          {user.userId}
-                        </div>
+                    {user.state === 'W' && (
+                      <input
+                        type="checkbox"
+                        checked={selectedUsers.includes(user.uid)}
+                        onChange={() => handleUserSelect(user.uid)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-zinc-800"
+                      />
+                    )}
+                  </td>
+                )}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center">
+                    <div className="text-sm">
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        {user.name}
+                      </div>
+                      <div className="text-gray-500 dark:text-gray-400">
+                        {user.userId}
                       </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">{user.nickname}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <RoleDropdown
-                      value={userRoles[user.uid] || user.role || 'USER'}
-                      onChange={(value) => handleRoleChange(user.uid, value)}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900 dark:text-white">{user.nickname}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <RoleDropdown
+                    value={userRoles[user.uid] || user.role || 'USER'}
+                    onChange={(value) => handleRoleChange(user.uid, value)}
                       roles={getAvailableRoles(currentUserRole, roles)}
-                      disabled={user.state === 'D'}
-                    />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
+                    disabled={user.state === 'D'}
+                  />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center">
                       <span className={`px-3 py-1 inline-flex items-center text-sm leading-5 font-semibold rounded-full ${stateLabel.className}`}>
                         <StateIcon className="w-4 h-4 mr-1" />
                         {stateLabel.label}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {formatBirthday(user.birthday)}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    {user.state === 'W' && (
-                      <Tippy 
-                        content={
-                          <div className="flex items-center space-x-1">
-                            <UserCheck className="w-4 h-4" />
-                            <span>사용자 승인</span>
-                          </div>
-                        }
-                        theme="material"
-                        animation="shift-away"
-                        arrow={false}
-                        placement="left"
-                        delay={[0, 0]}
-                      >
-                        <button 
-                          onClick={() => handleApproveUsers([user.uid])}
-                          className="text-green-500 hover:text-green-600 mr-3"
-                        >
-                          <UserCheck className="w-5 h-5" />
-                        </button>
-                      </Tippy>
-                    )}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {formatBirthday(user.birthday)}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  {user.state === 'W' && (
                     <Tippy 
                       content={
-                        <div className="flex items-center space-x-1 px-2 py-1">
-                          <Key className="w-4 h-4" />
-                          <span>비밀번호 초기화</span>
+                        <div className="flex items-center space-x-1">
+                          <UserCheck className="w-4 h-4" />
+                          <span>사용자 승인</span>
                         </div>
                       }
                       theme="material"
@@ -369,55 +348,76 @@ function ManageUser() {
                       placement="left"
                       delay={[0, 0]}
                     >
+                      <button 
+                          onClick={() => handleApproveUsers([user.uid])}
+                        className="text-green-500 hover:text-green-600 mr-3"
+                      >
+                          <UserCheck className="w-5 h-5" />
+                      </button>
+                    </Tippy>
+                  )}
+                  <Tippy 
+                    content={
+                      <div className="flex items-center space-x-1 px-2 py-1">
+                        <Key className="w-4 h-4" />
+                        <span>비밀번호 초기화</span>
+                      </div>
+                    }
+                    theme="material"
+                    animation="shift-away"
+                    arrow={false}
+                    placement="left"
+                    delay={[0, 0]}
+                  >
                       <button 
                         onClick={() => handlePasswordReset(user)}
                         className="text-blue-500 hover:text-blue-600 mr-3"
                       >
-                        <Key className="w-5 h-5" />
-                      </button>
-                    </Tippy>
-                    <Tippy 
-                      content={
-                        <div className="flex items-center space-x-1 px-2 py-1">
-                          <Edit2 className="w-4 h-4" />
-                          <span>사용자 정보 수정</span>
-                        </div>
-                      }
-                      theme="material"
-                      animation="shift-away"
-                      arrow={false}
-                      placement="left"
-                      delay={[0, 0]}
-                    >
+                      <Key className="w-5 h-5" />
+                    </button>
+                  </Tippy>
+                  <Tippy 
+                    content={
+                      <div className="flex items-center space-x-1 px-2 py-1">
+                        <Edit2 className="w-4 h-4" />
+                        <span>사용자 정보 수정</span>
+                      </div>
+                    }
+                    theme="material"
+                    animation="shift-away"
+                    arrow={false}
+                    placement="left"
+                    delay={[0, 0]}
+                  >
                       <button 
                         onClick={() => handleEditUser(user)}
                         className="text-green-500 hover:text-green-600 mr-3"
                       >
-                        <Edit2 className="w-5 h-5" />
-                      </button>
-                    </Tippy>
-                    <Tippy 
-                      content={
-                        <div className="flex items-center space-x-1">
-                          <Trash2 className="w-4 h-4" />
-                          <span>사용자 삭제</span>
-                        </div>
-                      }
-                      theme="material"
-                      animation="shift-away"
-                      arrow={false}
-                      placement="left"
-                      delay={[0, 0]}
-                    >
+                      <Edit2 className="w-5 h-5" />
+                    </button>
+                  </Tippy>
+                  <Tippy 
+                    content={
+                      <div className="flex items-center space-x-1">
+                        <Trash2 className="w-4 h-4" />
+                        <span>사용자 삭제</span>
+                      </div>
+                    }
+                    theme="material"
+                    animation="shift-away"
+                    arrow={false}
+                    placement="left"
+                    delay={[0, 0]}
+                  >
                       <button 
                         onClick={() => handleDeleteUser(user.uid)}
                         className="text-red-500 hover:text-red-600"
                       >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </Tippy>
-                  </td>
-                </tr>
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </Tippy>
+                </td>
+              </tr>
               );
             })}
           </tbody>

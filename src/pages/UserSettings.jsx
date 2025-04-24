@@ -97,49 +97,49 @@ function UserSettings() {
       <div className="max-w-2xl mx-auto space-y-6">
         {/* 기본 정보 수정 폼 */}
         <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-            <User className="w-5 h-5" />
-            기본 정보
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                이름
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={userInfo.name}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                닉네임
-              </label>
-              <input
-                type="text"
-                name="nickname"
-                value={userInfo.nickname}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+              <User className="w-5 h-5" />
+              기본 정보
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  이름
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={userInfo.name}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  닉네임
+                </label>
+                <input
+                  type="text"
+                  name="nickname"
+                  value={userInfo.nickname}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 생년월일
-              </label>
-              <input
+                </label>
+                <input
                 type="date"
                 name="birthday"
                 value={userInfo.birthday}
-                onChange={handleChange}
+                  onChange={handleChange}
                 max={new Date().toISOString().split('T')[0]}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
-              />
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                />
+              </div>
             </div>
-          </div>
           <div className="flex justify-end mt-6">
             <button
               type="submit"
@@ -153,50 +153,50 @@ function UserSettings() {
 
         {/* 비밀번호 변경 폼 */}
         <form onSubmit={handlePasswordChange} className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-            <Lock className="w-5 h-5" />
-            비밀번호 변경
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                현재 비밀번호
-              </label>
-              <input
-                type="password"
-                name="currentPassword"
-                value={userInfo.currentPassword}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                새 비밀번호
-              </label>
-              <input
-                type="password"
-                name="newPassword"
-                value={userInfo.newPassword}
-                onChange={handleChange}
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+              <Lock className="w-5 h-5" />
+              비밀번호 변경
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  현재 비밀번호
+                </label>
+                <input
+                  type="password"
+                  name="currentPassword"
+                  value={userInfo.currentPassword}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  새 비밀번호
+                </label>
+                <input
+                  type="password"
+                  name="newPassword"
+                  value={userInfo.newPassword}
+                  onChange={handleChange}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white ${
                   passwordError ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
                 }`}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                새 비밀번호 확인
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={userInfo.confirmPassword}
-                onChange={handleChange}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  새 비밀번호 확인
+                </label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={userInfo.confirmPassword}
+                  onChange={handleChange}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-zinc-800 text-gray-900 dark:text-white ${
                   passwordError ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
                 }`}
-              />
+                />
             </div>
           </div>
           <div className="flex justify-end mt-6">

@@ -72,6 +72,21 @@ export const menus = {
   getMenuByUid: async (uid) => {
     const response = await axiosUtil.get(`/menu/get/${uid}`);
     return response.data;
+  },
+
+  getFullMenuTree: async () => {
+    const response = await axiosUtil.get('/menu/getFullMenuTree');
+    return response.data;
+  },
+
+  updateMenu: async (menu) => {
+    const response = await axiosUtil.put('/menu/update', menu);
+    return response.data;
+  },
+
+  deleteMenu: async (menuId) => {
+    const response = await axiosUtil.delete('/menu/delete', { data: { id: menuId } });
+    return response.data;
   }
 };
 
