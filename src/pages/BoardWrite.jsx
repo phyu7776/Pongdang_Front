@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import { boards } from '../api/endpoints';
 import { ClipboardList } from 'lucide-react';
 import { ToasterConfig, showSuccessToast, showErrorToast } from '../components/common/Toast';
+import DOMPurify from 'dompurify';
+import sanitizeHtml from 'sanitize-html';
+import QuillEditor from '../components/editor/QuillEditor';
 
 const BoardWrite = () => {
   const navigate = useNavigate();
@@ -94,13 +95,7 @@ const BoardWrite = () => {
           stroke: #1f2937 !important;
         `}
       }
-      .ql-snow .ql-fill {
-        ${isDarkMode ? `
-          fill: #f3f4f6 !important;
-        ` : `
-          fill: #1f2937 !important;
-        `}
-      }
+      
     `;
     document.head.appendChild(style);
 
@@ -123,16 +118,28 @@ const BoardWrite = () => {
         return;
       }
 
-      const response = await boards.createBoard({
-        title,
-        content,
+      if (!window.confirm('게시글을 작성하시겠습니까?')) {
+        return;
+      }
+
+      // XSS 방지를 위한 HTML sanitize
+      const sanitizedContent = sanitizeHtml(content, {
+        allowedTags: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img'],
+        allowedAttributes: {
+          'a': ['href', 'target'],
+          'img': ['src', 'alt', 'width', 'height']
+        },
+        allowedSchemes: ['http', 'https', 'data']
+      });
+
+      await boards.createBoard({
+        name: DOMPurify.sanitize(title),
+        content: sanitizedContent,
         isNotice
       });
 
-      if (response.status === 201) {
-        showSuccessToast('게시글이 작성되었습니다.');
-        navigate('/board');
-      }
+      showSuccessToast('게시글이 작성되었습니다.');
+      navigate('/board');
     } catch (error) {
       console.error('게시글 작성 실패:', error);
       showErrorToast('게시글 작성에 실패했습니다.');
@@ -195,8 +202,7 @@ const BoardWrite = () => {
 
           <div>
             <div className="mt-1">
-              <ReactQuill
-                theme="snow"
+              <QuillEditor
                 value={content}
                 onChange={setContent}
                 modules={modules}

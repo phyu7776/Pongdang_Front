@@ -8,9 +8,7 @@ import MenuSettings from '../pages/MenuSettings';
 import ManageUser from '../pages/ManageUser';
 import UserSettings from '../pages/UserSettings';
 import BoardList from '../pages/BoardList';
-import BoardCreate from '../pages/BoardCreate';
 import BoardDetail from '../pages/BoardDetail';
-import BoardEdit from '../pages/BoardEdit';
 import NotFound from '../pages/NotFound';
 import BoardWrite from '../pages/BoardWrite';
 import { useAuth } from '../hooks/useAuth';
@@ -45,7 +43,7 @@ export const AppRoutes = () => {
         <Route path="board" element={<BoardList />} />
         <Route path="board/create" element={<BoardWrite />} />
         <Route path="board/:id" element={<BoardDetail />} />
-        <Route path="board/:id/edit" element={<BoardEdit />} />
+        <Route path="board/:id/edit" element={<BoardWrite isEdit={true} />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

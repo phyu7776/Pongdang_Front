@@ -116,7 +116,7 @@ export const boards = {
   },
 
   getBoardDetail: async (boardId) => {
-    const response = await axiosUtil.get(`/board/${boardId}`);
+    const response = await axiosUtil.get(`/board/get/${boardId}`);
     return response.data;
   },
 
@@ -125,14 +125,18 @@ export const boards = {
     return response.data;
   },
 
-  updateBoard: async (boardId, boardData) => {
-    const response = await axiosUtil.put(`/board/${boardId}`, boardData);
+  updateBoard: async (boardData) => {
+    const response = await axiosUtil.put(`/board/edit`, boardData);
     return response.data;
   },
 
-  deleteBoard: async (boardId) => {
-    const response = await axiosUtil.delete(`/board/${boardId}`);
-    return response.data;
+  deleteBoard: async (uid) => {
+    try {
+      const response = await axiosUtil.delete(`/board/delete/${uid}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   },
 
   getPosts: (boardId, params) => axiosUtil.get(`/board/${boardId}/posts`, { params }),
