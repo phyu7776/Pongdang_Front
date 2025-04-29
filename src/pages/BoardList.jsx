@@ -67,47 +67,49 @@ const BoardList = () => {
       </div>
       
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white dark:bg-zinc-800 rounded-lg shadow">
-          <thead>
-            <tr className="bg-gray-100 dark:bg-zinc-700">
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">구분</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">제목</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">작성자</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">작성일</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">추천</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-zinc-700">
-            {boardList.map((board, index) => (
-              <tr 
-                key={`${board.uid}-${index}`} 
-                ref={index === boardList.length - 1 ? lastBoardElementRef : null}
-                className="hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer"
-                onClick={() => navigate(`/board/${board.uid}`)}
-              >
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  {board.notice ? (
-                    <span className="px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded">
-                      공지
-                    </span>
-                  ) : null}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                  {board.name}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                  {board.creatorName}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                  {board.createdAt}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                  {board.good}
-                </td>
+        <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-zinc-800">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider first:rounded-tl-xl">구분</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">제목</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">작성자</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">작성일</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider last:rounded-tr-xl">추천</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white dark:bg-zinc-900 divide-y divide-gray-200 dark:divide-gray-700">
+              {boardList.map((board, index) => (
+                <tr 
+                  key={`${board.uid}-${index}`} 
+                  ref={index === boardList.length - 1 ? lastBoardElementRef : null}
+                  className="hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer"
+                  onClick={() => navigate(`/board/${board.uid}`)}
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm first:rounded-bl-xl last:rounded-br-xl">
+                    {board.notice ? (
+                      <span className="px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded">
+                        공지
+                      </span>
+                    ) : null}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    {board.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    {board.creatorName}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    {board.createdAt}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 last:rounded-br-xl">
+                    {board.good}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {loading && (

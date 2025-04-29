@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMenuStore } from '../store/menuStore';
 import axiosUtil from '../utils/axiosUtil';
@@ -40,6 +40,28 @@ function Sidebar() {
       console.error('Error fetching menu:', error);
     }
   };
+
+  // 메뉴 데이터를 가져올 때 하위 메뉴도 함께 가져오기
+  useEffect(() => {
+    const fetchSubMenus = async () => {
+      const subMenusData = {};
+      for (const menu of menus) {
+        try {
+          const response = await menuApi.getMenuByUid(menu.uid);
+          if (response && response.length > 0) {
+            subMenusData[menu.uid] = response;
+          }
+        } catch (error) {
+          console.error(`Error fetching submenu for ${menu.uid}:`, error);
+        }
+      }
+      setSubMenus(subMenusData);
+    };
+
+    if (menus && menus.length > 0) {
+      fetchSubMenus();
+    }
+  }, [menus]);
 
   const renderSubMenus = (parentUid) => {
     const menuSubItems = subMenus[parentUid];
