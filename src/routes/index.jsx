@@ -7,6 +7,10 @@ import SystemSettings from '../pages/SystemSettings';
 import MenuSettings from '../pages/MenuSettings';
 import ManageUser from '../pages/ManageUser';
 import UserSettings from '../pages/UserSettings';
+import BoardList from '../pages/BoardList';
+import BoardCreate from '../pages/BoardCreate';
+import BoardDetail from '../pages/BoardDetail';
+import BoardEdit from '../pages/BoardEdit';
 import NotFound from '../pages/NotFound';
 import { useAuth } from '../hooks/useAuth';
 
@@ -37,6 +41,10 @@ export const AppRoutes = () => {
         <Route path="manage-menu" element={<MenuSettings />} />
         <Route path="manage-user" element={<ManageUser />} />
         <Route path="user-settings" element={<UserSettings />} />
+        <Route path="board" element={<BoardList />} />
+        <Route path="board/create" element={<BoardCreate />} />
+        <Route path="board/:id" element={<BoardDetail />} />
+        <Route path="board/:id/edit" element={<BoardEdit />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

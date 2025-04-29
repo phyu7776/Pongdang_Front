@@ -101,4 +101,42 @@ export const config = {
     const response = await axiosUtil.get(`/config/get/systemConfig/${configType}`);
     return response.data;
   }
+};
+
+// Board APIs
+export const boards = {
+  getBoardList: async (page = 0, limit = 20) => {
+    const response = await axiosUtil.get('/board/getList', {
+      params: {
+        page,
+        limit
+      }
+    });
+    return response.data;
+  },
+
+  getBoardDetail: async (boardId) => {
+    const response = await axiosUtil.get(`/board/${boardId}`);
+    return response.data;
+  },
+
+  createBoard: async (boardData) => {
+    const response = await axiosUtil.post('/board/create', boardData);
+    return response.data;
+  },
+
+  updateBoard: async (boardId, boardData) => {
+    const response = await axiosUtil.put(`/board/${boardId}`, boardData);
+    return response.data;
+  },
+
+  deleteBoard: async (boardId) => {
+    const response = await axiosUtil.delete(`/board/${boardId}`);
+    return response.data;
+  },
+
+  getPosts: (boardId, params) => axiosUtil.get(`/board/${boardId}/posts`, { params }),
+  createPost: (boardId, data) => axiosUtil.post(`/board/${boardId}/post`, data),
+  updatePost: (boardId, postId, data) => axiosUtil.put(`/board/${boardId}/post/${postId}`, data),
+  deletePost: (boardId, postId) => axiosUtil.delete(`/board/${boardId}/post/${postId}`),
 }; 
