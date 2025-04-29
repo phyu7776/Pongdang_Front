@@ -12,6 +12,7 @@ import BoardCreate from '../pages/BoardCreate';
 import BoardDetail from '../pages/BoardDetail';
 import BoardEdit from '../pages/BoardEdit';
 import NotFound from '../pages/NotFound';
+import BoardWrite from '../pages/BoardWrite';
 import { useAuth } from '../hooks/useAuth';
 
 export const AppRoutes = () => {
@@ -42,7 +43,7 @@ export const AppRoutes = () => {
         <Route path="manage-user" element={<ManageUser />} />
         <Route path="user-settings" element={<UserSettings />} />
         <Route path="board" element={<BoardList />} />
-        <Route path="board/create" element={<BoardCreate />} />
+        <Route path="board/create" element={<BoardWrite />} />
         <Route path="board/:id" element={<BoardDetail />} />
         <Route path="board/:id/edit" element={<BoardEdit />} />
         <Route path="*" element={<NotFound />} />

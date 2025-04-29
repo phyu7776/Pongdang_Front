@@ -204,7 +204,7 @@ function ManageUser() {
   const waitingUsersCount = userList.filter(user => user.state === 'W').length;
 
   return (
-    <div className="p-8 bg-white dark:bg-zinc-900 min-h-screen">
+    <div className="p-6">
       <ToasterConfig />
       
       {/* Header */}

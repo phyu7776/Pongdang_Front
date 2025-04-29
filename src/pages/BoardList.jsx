@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { boards } from '../api/endpoints';
 import { useNavigate } from 'react-router-dom';
+import { ClipboardList } from 'lucide-react';
 
 const BoardList = () => {
   const [boardList, setBoardList] = useState([]);
@@ -53,7 +54,10 @@ const BoardList = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">게시판</h2>
+        <div className="flex items-center gap-3">
+          <ClipboardList className="w-8 h-8 text-blue-500" />
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-white">게시판</h2>
+        </div>
         <button
           onClick={handleCreateBoard}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
