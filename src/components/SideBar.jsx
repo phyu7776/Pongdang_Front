@@ -70,16 +70,19 @@ function Sidebar() {
   const renderMenuItem = (menu) => {
     const isClickable = !!menu?.url;
     const isExpanded = expandedMenus[menu.uid];
+    const hasSubMenus = subMenus[menu.uid]?.length > 0;
 
     return (
       <li key={menu.uid} className="text-black dark:text-white">
         <div className="flex items-center gap-1">
-          <button
-            onClick={() => handleMenuClick(menu, true)}
-            className="p-2 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded"
-          >
-            {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
-          </button>
+          {hasSubMenus && (
+            <button
+              onClick={() => handleMenuClick(menu, true)}
+              className="p-2 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded"
+            >
+              {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+            </button>
+          )}
           {isClickable ? (
             <div 
               onClick={() => handleMenuClick(menu)}
