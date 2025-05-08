@@ -11,6 +11,9 @@ import BoardList from '../pages/BoardList';
 import BoardDetail from '../pages/BoardDetail';
 import NotFound from '../pages/NotFound';
 import BoardWrite from '../pages/BoardWrite';
+import LessonList from '../pages/LessonList';
+import LessonDetail from '../pages/LessonDetail';
+import LessonWrite from '../pages/LessonWrite';
 import { useAuth } from '../hooks/useAuth';
 
 export const AppRoutes = () => {
@@ -44,6 +47,10 @@ export const AppRoutes = () => {
         <Route path="board/create" element={<BoardWrite />} />
         <Route path="board/:id" element={<BoardDetail />} />
         <Route path="board/:id/edit" element={<BoardWrite isEdit={true} />} />
+        <Route path="lesson-reservation" element={<LessonList />} />
+        <Route path="lesson-reservation/create" element={<LessonWrite />} />
+        <Route path="lesson-reservation/:id" element={<LessonDetail />} />
+        <Route path="lesson-reservation/:id/edit" element={<LessonWrite isEdit={true} />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

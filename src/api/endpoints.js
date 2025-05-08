@@ -143,4 +143,75 @@ export const boards = {
   createPost: (boardId, data) => axiosUtil.post(`/board/${boardId}/post`, data),
   updatePost: (boardId, postId, data) => axiosUtil.put(`/board/${boardId}/post/${postId}`, data),
   deletePost: (boardId, postId) => axiosUtil.delete(`/board/${boardId}/post/${postId}`),
+};
+
+// Lesson APIs
+export const lessons = {
+  getLessonList: async (page = 0, limit = 20) => {
+    const response = await axiosUtil.get('/lesson/getList', {
+      params: {
+        page,
+        limit
+      }
+    });
+    return response.data;
+  },
+
+  getLessonDetail: async (lessonId) => {
+    const response = await axiosUtil.get(`/lesson/get/${lessonId}`);
+    return response.data;
+  },
+
+  createLesson: async (lessonData) => {
+    const response = await axiosUtil.post('/lesson/create', lessonData);
+    return response.data;
+  },
+
+  updateLesson: async (lessonData) => {
+    const response = await axiosUtil.put(`/lesson/edit`, lessonData);
+    return response.data;
+  },
+
+  deleteLesson: async (uid) => {
+    try {
+      const response = await axiosUtil.delete(`/lesson/delete/${uid}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  reserveLesson: async (lessonId, userId) => {
+    const response = await axiosUtil.post(`/lesson/reserve`, {
+      lessonId,
+      userId
+    });
+    return response.data;
+  },
+
+  cancelReservation: async (lessonId, userId) => {
+    const response = await axiosUtil.post(`/lesson/cancel`, {
+      lessonId,
+      userId
+    });
+    return response.data;
+  }
+};
+
+// Geo APIs
+export const geo = {
+  createGeoData: async (geoData) => {
+    const response = await axiosUtil.post('/geo/create', geoData);
+    return response.data;
+  },
+  
+  deleteGeoData: async (id) => {
+    const response = await axiosUtil.delete(`/geo/delete/${id}`);
+    return response.data;
+  },
+  
+  getGeoList: async () => {
+    const response = await axiosUtil.get('/geo/getList');
+    return response.data;
+  }
 }; 
