@@ -9,7 +9,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// ✅ 재발급용 axios 인스턴스 (인터셉터 안 걸림)
+// 재발급용 axios 인스턴스 (인터셉터 안 걸림)
 export const refreshApi = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
@@ -17,16 +17,23 @@ export const refreshApi = axios.create({
 
 // 로그아웃 함수
 const logout = () => {
-  // userStore의 clearUser 함수만 호출하도록 변경 (중복 이벤트 발생 방지)
   useUserStore.getState().clearUser();
 };
 
-// 요청 전에 토큰 자동으로 붙이는 인터셉터
+// 요청 인터셉터
 api.interceptors.request.use(
   (config) => {
-    // 로그아웃 중이면 요청 취소
+    // 로그아웃 API 요청은 항상 허용
+    if (config.url === "/users/logout") {
+      const token = Cookies.get("token");
+      if (token) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+      }
+      return config;
+    }
+    
+    // 로그아웃 중이면 다른 요청 취소
     if (useUserStore.getState().isLoggingOut) {
-      // 로그아웃 중인 경우 요청 취소
       const controller = new AbortController();
       controller.abort();
       config.signal = controller.signal;
@@ -53,7 +60,7 @@ api.interceptors.response.use(
     
     const originalRequest = error.config;
 
-    // ✅ reissue 요청 실패 시 바로 로그아웃
+    // reissue 요청 실패 시 바로 로그아웃
     if (originalRequest.url.includes("/users/reissue")) {
       logout();
       return Promise.reject(error);

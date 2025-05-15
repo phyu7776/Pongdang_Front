@@ -1,29 +1,20 @@
 import { useEffect, useState } from "react";
-import useUserStore from "../store/userStore";
 import { motion } from "framer-motion";
 import { User, Lock, Moon, Sun } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import useThemeStore from "../store/themeStore";
 
-function Login({ onLogin }) {
+function Login() {
   const [form, setForm] = useState({ userId: "", password: "" });
   const [error, setError] = useState("");
-  const { darkMode, setDarkMode } = useUserStore();
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const { darkMode, toggleDarkMode } = useThemeStore();
 
   useEffect(() => {
     document.title = "퐁당 | 로그인 💧";
   }, []);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [darkMode]);
-  
-  const toggleDark = () => {
-    setDarkMode(!darkMode);
-  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -35,7 +26,7 @@ function Login({ onLogin }) {
     setLoading(true);
 
     try {
-      await onLogin(form.userId, form.password);
+      await login(form.userId, form.password);
     } catch (error) {
       if (error.response?.status === 400) {
         setError('아이디 또는 비밀번호가 잘못되었습니다.');
@@ -56,8 +47,9 @@ function Login({ onLogin }) {
         className="bg-white dark:bg-zinc-900 shadow-lg rounded-2xl px-10 py-12 w-full max-w-md relative"
       >
         <button
-          onClick={toggleDark}
+          onClick={toggleDarkMode}
           className="absolute top-4 right-4 text-gray-400 hover:text-white"
+          aria-label={darkMode ? '라이트 모드로 전환' : '다크 모드로 전환'}
         >
           {darkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
@@ -97,20 +89,21 @@ function Login({ onLogin }) {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition"
+            disabled={loading}
+            className={`w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
-            로그인
+            {loading ? '로그인 중...' : '로그인'}
           </button>
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
           아직 계정이 없나요?{" "}
-          <a
-            href="/register"
+          <Link
+            to="/register"
             className="text-blue-500 dark:text-blue-400 hover:underline font-medium"
           >
             회원가입
-          </a>
+          </Link>
         </div>
       </motion.div>
     </div>

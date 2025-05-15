@@ -3,11 +3,18 @@ import { useConfig } from './hooks/useConfig';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useUserStore from './store/userStore';
+import useThemeStore from './store/themeStore';
 
 function App() {
   const { loading } = useConfig();
   const navigate = useNavigate();
   const completeLogout = useUserStore(state => state.completeLogout);
+  const initTheme = useThemeStore(state => state.initTheme);
+
+  // 테마 초기화
+  useEffect(() => {
+    initTheme();
+  }, [initTheme]);
 
   useEffect(() => {
     const handleLogout = () => {

@@ -2,6 +2,9 @@ import { create } from "zustand";
 import Cookies from 'js-cookie';
 import axiosUtil from '../utils/axiosUtil'
 
+/**
+ * 사용자 관련 상태를 관리하는 스토어
+ */
 const useUserStore = create((set, get) => ({
   user: Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null,
   isLoggingOut: false, // 로그아웃 진행 중 플래그 추가
@@ -50,18 +53,7 @@ const useUserStore = create((set, get) => ({
   // 로그아웃 완료 후 호출
   completeLogout: () => {
     set({ isLoggingOut: false });
-  },
-  
-  darkMode: JSON.parse(localStorage.getItem("darkMode")) || false, // 다크모드 상태
-  setDarkMode: (isDark) => {
-    set({ darkMode: isDark });
-    localStorage.setItem("darkMode", JSON.stringify(isDark)); // 다크모드 상태 저장
-    if (isDark) {
-      document.documentElement.classList.add("dark"); // 다크모드 클래스 추가
-    } else {
-      document.documentElement.classList.remove("dark"); // 다크모드 클래스 제거
-    }
-  },
+  }
 }));
 
 export default useUserStore;

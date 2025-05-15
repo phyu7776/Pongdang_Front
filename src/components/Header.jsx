@@ -8,10 +8,13 @@ import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/material.css';
 import 'tippy.js/animations/shift-away.css';
+import { useAuth } from "../context/AuthContext";
+import useThemeStore from "../store/themeStore";
+import { memo } from "react";
 
 function Header() {
-  const { user ,clearUser } = useUserStore();
-  const { darkMode, setDarkMode } = useUserStore();
+  const { user, logout } = useAuth();
+  const { darkMode, toggleDarkMode } = useThemeStore();
   const navigate = useNavigate();
 
   // 초기 렌더링 시 다크모드 상태 반영
@@ -23,9 +26,8 @@ function Header() {
     }
   }, [darkMode]);
 
-
   const handleLogout = () => {
-    clearUser(); // 상태 초기화 및 로그아웃 처리
+    logout();
   };
 
   return (
@@ -55,19 +57,28 @@ function Header() {
           placement="bottom"
           delay={[0, 0]}
         >
-          <button onClick={() => navigate('/user-settings')}>
+          <button 
+            onClick={() => navigate('/user-settings')}
+            aria-label="개인 설정"
+          >
             <Settings className="text-gray-500 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors" />
           </button>
         </Tippy>
 
          {/* 다크모드 토글 버튼 */}
-         <button className="text-gray-500 dark:text-gray-300 cursor-pointer"
-          onClick={() => setDarkMode(!darkMode)}>
+         <button
+          className="text-gray-500 dark:text-gray-300 cursor-pointer"
+          onClick={toggleDarkMode}
+          aria-label={darkMode ? '라이트 모드로 전환' : '다크 모드로 전환'}
+         >
           {darkMode ? <Sun size={24} /> : <Moon size={24} />}
         </button>
 
-
-        <button onClick={handleLogout} className="text-red-500 cursor-pointer">
+        <button 
+          onClick={handleLogout} 
+          className="text-red-500 cursor-pointer"
+          aria-label="로그아웃"
+        >
           <LogOut />
         </button>
       
@@ -76,4 +87,4 @@ function Header() {
   );
 }
 
-export default Header;
+export default memo(Header);
