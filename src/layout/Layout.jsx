@@ -6,16 +6,21 @@ import { useEffect } from "react";
 import { useMenuStore } from "../store/menuStore";
 import Cookies from 'js-cookie';
 import mainLogo from "../assets/pongdang-logo-main.png";
+import useUserStore from "../store/userStore";
 
 function Layout() {
   const { fetchMenus } = useMenuStore();
+  const isLoggingOut = useUserStore(state => state.isLoggingOut);
 
   useEffect(() => {
-    const token = Cookies.get('token');
-    if (token) {
-      fetchMenus();
+    // 로그아웃 중이 아닐 때만 메뉴 불러오기
+    if (!isLoggingOut) {
+      const token = Cookies.get('token');
+      if (token) {
+        fetchMenus();
+      }
     }
-  }, [fetchMenus]);
+  }, [fetchMenus, isLoggingOut]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100 dark:bg-zinc-900 transition">

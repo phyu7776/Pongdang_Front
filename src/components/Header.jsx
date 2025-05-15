@@ -25,8 +25,7 @@ function Header() {
 
 
   const handleLogout = () => {
-    clearUser(); // 상태 초기화
-    navigate("/login"); // 로그인으로 이동
+    clearUser(); // 상태 초기화 및 로그아웃 처리
   };
 
   return (

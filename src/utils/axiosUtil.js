@@ -17,15 +17,22 @@ export const refreshApi = axios.create({
 
 // 로그아웃 함수
 const logout = () => {
+  // userStore의 clearUser 함수만 호출하도록 변경 (중복 이벤트 발생 방지)
   useUserStore.getState().clearUser();
-  // React Router를 통한 네비게이션을 위해 이벤트를 발생시킵니다
-  const event = new CustomEvent('auth-logout');
-  window.dispatchEvent(event);
 };
 
 // 요청 전에 토큰 자동으로 붙이는 인터셉터
 api.interceptors.request.use(
   (config) => {
+    // 로그아웃 중이면 요청 취소
+    if (useUserStore.getState().isLoggingOut) {
+      // 로그아웃 중인 경우 요청 취소
+      const controller = new AbortController();
+      controller.abort();
+      config.signal = controller.signal;
+      return config;
+    }
+    
     const token = Cookies.get("token");
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
@@ -39,6 +46,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    // 요청이 취소된 경우 무시
+    if (axios.isCancel(error)) {
+      return Promise.reject(new Error("로그아웃 중 요청이 취소되었습니다."));
+    }
+    
     const originalRequest = error.config;
 
     // ✅ reissue 요청 실패 시 바로 로그아웃
@@ -47,7 +59,12 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    if (error.response?.status === 403 && !originalRequest._retry) {
+    if (error.response?.status === 401 && error.response?.data === "Invalid token" && !originalRequest._retry) {
+      // 로그아웃 중이면 재시도 하지 않음
+      if (useUserStore.getState().isLoggingOut) {
+        return Promise.reject(error);
+      }
+      
       originalRequest._retry = true;
 
       try {

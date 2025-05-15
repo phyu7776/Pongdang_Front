@@ -7,7 +7,7 @@ import Cookies from 'js-cookie';
 
 export const useAuth = () => {
   const navigate = useNavigate();
-  const { setUser, user } = useUserStore();
+  const { setUser, user, clearUser } = useUserStore();
   const { fetchMenus } = useMenuStore();
   const config = useConfigStore((state) => state.config);
 
@@ -38,10 +38,8 @@ export const useAuth = () => {
   };
 
   const logout = () => {
-    Cookies.remove('token');
-    localStorage.removeItem('refreshToken');
-    setUser(null);
-    navigate('/login');
+    // userStore의 clearUser만 호출 (중앙 집중식 로그아웃 처리)
+    clearUser();
   };
 
   const isAuthenticated = !!user?.userId;

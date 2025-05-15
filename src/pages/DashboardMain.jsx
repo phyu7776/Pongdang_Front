@@ -295,4 +295,4 @@ function DashboardMain() {
   );
 }
 
-export default DashboardMain;
+export { DashboardMain as default };
